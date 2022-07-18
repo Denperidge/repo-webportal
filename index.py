@@ -2,24 +2,40 @@
 
 # Imports
 from urllib import request, error
-from json import loads
-from os import path, mkdir, makedirs
+from json import loads, dumps
+from os import path, makedirs
 from shutil import copy2
-from time import sleep
 
 # Constants
 output_dir = "output/"
 last_usage = path.join(output_dir, "data.txt")
 #assets_dir = path.join(output_dir, "assets/")
 site_filename = path.join(output_dir, "index.md")
-cache = path.join(output_dir + "cache.txt")
+cache_file = path.join(output_dir + "cache.txt")
+
 
 # Functions
+def read_txt(name, default):
+    try:
+        with open(name, "r") as file:
+            data = file.read()
+    except FileNotFoundError:
+        data = default
+    finally:
+        return data
+
+# Get from cache if possible, otherwise send request
 def get(url):
-    req = request.urlopen(url)
-    res = req.read()
-    req.close()
-    return res
+    try:
+        data = cache[url]
+    except KeyError:
+        req = request.urlopen(url)
+        data = req.read()
+        req.close()
+
+        cache[url] = data
+
+    return data
 
 #def save_image(url, filename):
 #    request.urlretrieve(url, path.join(assets_dir, filename))
@@ -30,11 +46,8 @@ def get(url):
 makedirs(output_dir, exist_ok=True)
 
 # If this script was run before, suggest the previous username or osoc
-try:
-    with open(last_usage, "r") as file:
-        old_user_or_org = file.read()
-except FileNotFoundError:
-    old_user_or_org = ""
+old_user_or_org = read_txt(last_usage, "")
+cache = loads(read_txt(cache_file, dict()))
 
 # Prompt oser for user or organisation name, create api URL
 user_or_org = input("Insert username or organisation name [{0}]: ".format(old_user_or_org)) or old_user_or_org
@@ -78,6 +91,8 @@ for raw_repo in data:
     
     repos.append(repo)
 
+with open(cache_file, "w") as file:
+    file.write(dumps(cache))
 
 markdown = """
 <link rel="stylesheet" href="stylesheet.css">
