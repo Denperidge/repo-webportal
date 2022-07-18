@@ -50,21 +50,7 @@ header_img = data[0]["owner"]["avatar_url"]
 save_image(header_img, "user_or_org.png")
 
 repos = list()
-for raw_repo in data:
-    """
-    readme code meant to get img from README, but actually that wouldn't include markdown notation so honestly not good idea
-
-    readme_url = "https://raw.githubusercontent.com/{0}/{1}/README.md".format(raw_repo["full_name"], raw_repo["default_branch"])
-    try:
-        readme = get(readme_url)
-        print(BeautifulSoup(readme).find("img"))
-
-
-    except error.HTTPError:
-        pass
-    """
-    
-
+for raw_repo in data:  
     # Save data used in output
     repo = {
         "name": raw_repo["name"],
