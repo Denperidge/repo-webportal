@@ -1,3 +1,14 @@
 img {
+    width: 80px;
+    
+    border: 1px solid black;
+    border-radius: 50%;
+}
+
+.header {
     width: 200px;
+}
+
+body {
+    text-align: center;
 }

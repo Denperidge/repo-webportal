@@ -101,21 +101,25 @@ with open(cache_file, "w", encoding="utf-8") as file:
     file.write(dumps(cache))
 
 markdown = """
+<link rel="stylesheet" href="https://unpkg.com/wingcss"/>
 <link rel="stylesheet" href="stylesheet.css">
-# Weboportal for {name}
-![Profile icon]({header_img})
+
+# Webportal for {name}
+<img class="header" alt="Profile icon" src="{header_img}" />
+
+---
+<br><br>
+
 """.format(name=user_or_org, header_img=image_url.format(user_or_org))
 
 markdown_repo = """
 ## {repo_name}
-{url_1} {url_2}
+##### {url_1} {url_2}
+<br>
 """
 
 markdown_contributors = """
-[
-    ![{name}'s profile picture]({image})
-]({url})
-"""
+[![{0[name]}'s profile picture]({0[image]})]({0[url]})"""
 
 markdown_repo_url = "[Repo]({0})"
 markdown_website_url = "[Website]({0})"
@@ -137,12 +141,11 @@ for repo in repos:
         url_2 = ""
 
 
+    contributors = ""
     # --- CONTRIBUTOR URLS ---
-    contributors = repo["contributors"]
-    for contributor in contributors:
-        markdown_contributors.format(
-            contributor
-        )
+    raw_contributors = repo["contributors"]
+    for contributor in raw_contributors:
+        contributors += markdown_contributors.format(contributor)
 
 
     # --- OUTPUT ---
@@ -150,12 +153,16 @@ for repo in repos:
         repo_name=name,
         url_1=url_1,
         url_2=url_2
-    )
+        ) + \
+        """ 
 
-    markdown += \
-    """
-    
-    """
+        """ + contributors
+
+
+
+
+
+    markdown += "<br><br>"
 
 
 copy2("stylesheet.css", output_dir)
