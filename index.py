@@ -28,12 +28,14 @@ def read_txt(name, default):
 def get(url):
     try:
         data = cache[url]
+        print("LOADED FROM CACHE: " + url)
     except KeyError:
         req = request.urlopen(url)
-        data = req.read()
+        data = req.read().decode("utf-8")
         req.close()
 
         cache[url] = data
+        print("CACHED: " + url)
 
     return data
 
@@ -47,7 +49,11 @@ makedirs(output_dir, exist_ok=True)
 
 # If this script was run before, suggest the previous username or osoc
 old_user_or_org = read_txt(last_usage, "")
-cache = loads(read_txt(cache_file, dict()))
+cache = read_txt(cache_file, dict())
+if type(cache) is not dict:
+    cache = loads(cache)
+
+
 
 # Prompt oser for user or organisation name, create api URL
 user_or_org = input("Insert username or organisation name [{0}]: ".format(old_user_or_org)) or old_user_or_org
@@ -91,7 +97,7 @@ for raw_repo in data:
     
     repos.append(repo)
 
-with open(cache_file, "w") as file:
+with open(cache_file, "w", encoding="utf-8") as file:
     file.write(dumps(cache))
 
 markdown = """
