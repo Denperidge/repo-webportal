@@ -5,12 +5,14 @@ from urllib import request, error
 from json import loads
 from os import path, mkdir, makedirs
 from shutil import copy2
+from time import sleep
 
 # Constants
 output_dir = "output/"
 last_usage = path.join(output_dir, "data.txt")
 #assets_dir = path.join(output_dir, "assets/")
 site_filename = path.join(output_dir, "index.md")
+cache = path.join(output_dir + "cache.txt")
 
 # Functions
 def get(url):
@@ -50,23 +52,29 @@ data = loads(get(url))
 repos = list()
 for raw_repo in data:  
     # Get contributor data
+    # If size == 0, assume repo is empty, skip
+    if not raw_repo["size"]:
+        continue
     raw_contributors = loads(get(raw_repo["contributors_url"]))
     contributors = list()
     for raw_contributor in raw_contributors:
         if raw_contributor["type"] == "Bot":
             continue
         contributor = {
-            "name": raw_contributor["name"],
-            "image": image_url.format(raw_contributor["name"]),
+            "name": raw_contributor["login"],
+            "image": image_url.format(raw_contributor["login"]),
             "url": raw_contributor["html_url"]
         }
+        contributors.append(contributor)
 
     # Save data used in output
     repo = {
         "name": raw_repo["name"],
         "repo-url": raw_repo["html_url"],
         "website-url": raw_repo["homepage"],
+        "contributors": contributors
     }
+
     
     repos.append(repo)
 
@@ -80,6 +88,12 @@ markdown = """
 markdown_repo = """
 ## {repo_name}
 {url_1} {url_2}
+"""
+
+markdown_contributors = """
+[
+    ![{name}'s profile picture]({image})
+]({url})
 """
 
 markdown_repo_url = "[Repo]({0})"
@@ -103,6 +117,11 @@ for repo in repos:
 
 
     # --- CONTRIBUTOR URLS ---
+    contributors = repo["contributors"]
+    for contributor in contributors:
+        markdown_contributors.format(
+            contributor
+        )
 
 
     # --- OUTPUT ---
