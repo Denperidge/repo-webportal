@@ -10,6 +10,8 @@ from bs4 import BeautifulSoup
 output_dir = "output/"
 last_usage = path.join(output_dir, "data.txt")
 assets_dir = path.join(output_dir, "assets/")
+site_filename = path.join(output_dir, "index.md")
+user_or_org_img_name = path.join(output_dir, "assets/", "header.png")
 
 # Functions
 def get(url):
@@ -45,9 +47,7 @@ url = "https://api.github.com/users/{0}/repos".format(user_or_org)
 
 data = loads(get(url))
 
-
-header_img = data[0]["owner"]["avatar_url"]
-save_image(header_img, "user_or_org.png")
+save_image(data[0]["owner"]["avatar_url"], user_or_org_img_name)
 
 repos = list()
 for raw_repo in data:  
@@ -56,9 +56,14 @@ for raw_repo in data:
         "name": raw_repo["name"],
         "repo-url": raw_repo["html_url"],
         "website-url": raw_repo["homepage"],
-        
     }
     
     repos.append(repo)
+
+
+markdown = """
+# Weboportal for 
+![Profile icon]
+"""
 
 print(repos)
