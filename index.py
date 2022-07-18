@@ -4,14 +4,12 @@
 from urllib import request, error
 from json import loads
 from os import path, mkdir, makedirs
-from bs4 import BeautifulSoup
 
 # Constants
 output_dir = "output/"
 last_usage = path.join(output_dir, "data.txt")
 assets_dir = path.join(output_dir, "assets/")
 site_filename = path.join(output_dir, "index.md")
-user_or_org_img_name = path.join(output_dir, "assets/", "header.png")
 
 # Functions
 def get(url):
@@ -42,12 +40,11 @@ if old_user_or_org is not user_or_org:
         file.writelines(user_or_org)
 
 url = "https://api.github.com/users/{0}/repos".format(user_or_org)
+image_url = "https://github.com/{0}.png".format(user_or_org)
 
 # Get the data using Githubs API, parse JSON
 
 data = loads(get(url))
-
-save_image(data[0]["owner"]["avatar_url"], user_or_org_img_name)
 
 repos = list()
 for raw_repo in data:  
@@ -63,7 +60,8 @@ for raw_repo in data:
 
 markdown = """
 # Weboportal for 
-![Profile icon]
+![Profile icon]()
 """
 
-print(repos)
+with open(site_filename, "w") as site:
+    site.write(markdown)
